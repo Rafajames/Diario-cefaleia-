@@ -21,7 +21,7 @@ export const revokeLink = (id: string) => updateRow<CareLink>('care_links', id, 
 
 export interface Invite { id: string; email: string; role: Role; created_at: string; expires_at: string; accepted_at: string | null; revoked_at: string | null }
 export const fetchInvites = () => unwrap<Invite[]>(supabase().from('invites').select('*').order('created_at', { ascending: false }).limit(500))
-export function createInvite(email: string, role: 'patient' | 'professional', invited_by: string) {
+export function createInvite(email: string, role: 'patient' | 'professional' | 'reception', invited_by: string) {
   const e = email.trim().toLowerCase()
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)) throw new ValidationError([{ path: 'email', message: 'Informe um e-mail válido.' }])
   return insertRow<Invite>('invites', { email: e, role, invited_by })

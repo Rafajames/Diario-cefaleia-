@@ -6,6 +6,9 @@ import { useAction } from '@/hooks/useDraft'
 import { fmtDate } from '@/utils/datetime'
 import { friendlyError } from '@/utils/errors'
 import { useProfile } from '@/modules/authentication/AuthProvider'
+
+/** Administração e recepção usam as mesmas telas, em caminhos diferentes. */
+const useBase = () => (useProfile().role === 'reception' ? '/recepcao' : '/admin/cadastros')
 import { RegistryForm } from './RegistryForm'
 import { registryClaim, registryList, STATUS_LABEL, type Registry } from './service'
 
@@ -13,12 +16,13 @@ const STATUS_OPTIONS = [{ value: 'incomplete', label: 'Incompleto' }, { value: '
 
 /** Administração: busca e lista de cadastros. O CPF aparece mascarado; a busca aceita nome, prontuário ou CPF completo. */
 export function AdminRegistryListPage() {
+  const base = useBase()
   const [search, setSearch] = useState('')
   const [status, setStatus] = useState('')
   const q = useQuery({ queryKey: ['registry-list', search, status], queryFn: () => registryList(search, status) })
   return (
     <div className="space-y-4">
-      <PageTitle action={<Link to="/admin/cadastros/novo"><Button small>Novo cadastro</Button></Link>}>Cadastros de pacientes</PageTitle>
+      <PageTitle action={<Link to={`${base}/novo`}><Button small>Novo cadastro</Button></Link>}>Cadastros de pacientes</PageTitle>
       <Alert tone="info">Cadastros podem ser criados antes de o paciente ter conta e ficam incompletos até os dados obrigatórios serem preenchidos. Abrir um cadastro de paciente fica registrado.</Alert>
       <Card>
         <div className="mb-3 grid gap-3 sm:grid-cols-2">
@@ -31,7 +35,7 @@ export function AdminRegistryListPage() {
               r.record_number, <strong>{r.full_name || 'Sem nome'}</strong>, r.cpf_masked ?? '—', r.birth_date ? fmtDate(r.birth_date) : '—',
               <Badge tone={r.registration_status === 'complete' ? 'good' : r.registration_status === 'inactive' ? 'neutral' : 'warn'}>{STATUS_LABEL[r.registration_status]}</Badge>,
               r.linked ? 'Vinculada' : 'Sem conta', r.responsible_name ?? '—',
-              <Link to={`/admin/cadastros/${r.id}`}><Button small>Abrir</Button></Link>,
+              <Link to={`${base}/${r.id}`}><Button small>Abrir</Button></Link>,
             ])} />
         )}
       </Card>
@@ -40,13 +44,14 @@ export function AdminRegistryListPage() {
 }
 
 export function AdminRegistryEditPage() {
+  const base = useBase()
   const { id = '' } = useParams()
   const nav = useNavigate()
   const isNew = id === 'novo'
   return (
     <div className="space-y-4">
-      <PageTitle action={<Link className="text-sm text-brand" to="/admin/cadastros">← Cadastros</Link>}>{isNew ? 'Novo cadastro' : 'Cadastro do paciente'}</PageTitle>
-      <RegistryForm key={id} mode="admin" registryId={isNew ? null : id} onCreated={(newId) => nav(`/admin/cadastros/${newId}`, { replace: true })} />
+      <PageTitle action={<Link className="text-sm text-brand" to={base}>← Cadastros</Link>}>{isNew ? 'Novo cadastro' : 'Cadastro do paciente'}</PageTitle>
+      <RegistryForm key={id} mode="admin" registryId={isNew ? null : id} onCreated={(newId) => nav(`${base}/${newId}`, { replace: true })} />
     </div>
   )
 }

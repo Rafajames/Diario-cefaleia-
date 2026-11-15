@@ -23,6 +23,10 @@ const NAV: Record<string, NavItem[]> = {
     { to: '/profissional', label: 'Pacientes', icon: '☰', end: true },
     { to: '/conta', label: 'Minha conta', icon: '☺' },
   ],
+  reception: [
+    { to: '/recepcao', label: 'Cadastros', icon: '▣' },
+    { to: '/conta', label: 'Minha conta', icon: '☺' },
+  ],
   admin: [
     { to: '/admin', label: 'Painel', icon: '◧', end: true },
     { to: '/admin/cadastros', label: 'Cadastros', icon: '▣' },
@@ -38,7 +42,7 @@ const NAV: Record<string, NavItem[]> = {
 const MODE_KEY = 'diario.perfil'
 const readMode = () => { try { return localStorage.getItem(MODE_KEY) } catch { return null } }
 const saveMode = (m: string) => { try { localStorage.setItem(MODE_KEY, m) } catch { /* preferência opcional */ } }
-const ROLE_LABEL = { patient: 'Paciente', professional: 'Profissional de saúde', admin: 'Administrador geral' }
+const ROLE_LABEL = { patient: 'Paciente', professional: 'Profissional de saúde', admin: 'Administrador geral', reception: 'Recepção' }
 
 /** Estrutura das telas autenticadas: cabeçalho, navegação lateral (desktop) e inferior (celular). */
 export function AppLayout() {

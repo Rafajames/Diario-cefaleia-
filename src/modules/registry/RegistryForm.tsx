@@ -79,7 +79,7 @@ export function RegistryForm({ registryId, userId, mode, onCreated }: { registry
   }, [reg, loadedId])
   useEffect(() => { if (isNew) setDraft({}) }, [isNew])
 
-  const readOnly = mode === 'view' || (!isNew && q.data?.access !== undefined && !['owner', 'admin'].includes(q.data.access))
+  const readOnly = mode === 'view' || (!isNew && q.data?.access !== undefined && !['owner', 'admin', 'staff'].includes(q.data.access))
   const minor = !isAdult(draft.birth_date, today)
   const changes = useMemo(() => {
     const out: Record<string, string> = {}
@@ -196,7 +196,7 @@ export function RegistryForm({ registryId, userId, mode, onCreated }: { registry
           {code && <Alert tone="good">Prontuário <strong>{reg!.record_number}</strong> · Código <strong className="font-mono text-base">{code}</strong>. Anote agora: ele não será mostrado de novo.</Alert>}
         </Card>
       )}
-      {!isNew && view && ['owner', 'admin'].includes(view.access) && <History id={reg!.id} />}
+      {!isNew && view && ['owner', 'admin', 'staff'].includes(view.access) && <History id={reg!.id} />}
     </div>
   )
 }

@@ -456,4 +456,44 @@ describe.skipIf(!url)('segurança do banco (RLS)', () => {
       expect((await as('fe', async (q) => (await q(`select registry_claim($1, $2) ok`, [r2.record_number, code2])).rows[0].ok))).toBe(false)
     })
   })
+
+  describe('perfil de recepção', () => {
+    const save = (user: string, id: string | null, data: object) =>
+      as(user, async (q) => (await q(`select registry_save($1, $2::jsonb) r`, [id, JSON.stringify(data)])).rows[0].r)
+    it('só o administrador atribui o perfil; o próprio usuário não consegue se promover', async () => {
+      await signup('rec', 'recepcao@teste.dev', { full_name: 'Recepção Teste' })
+      await denied(as('rec', (q) => q(`update profiles set role = 'reception' where id = $1`, [ids.rec])))
+      await db.query(`update profiles set role = 'reception' where id = $1`, [ids.rec])
+      await consent('rec', 'personal_data')
+      expect((await rows('rec', `select role::text r from profiles where id = auth.uid()`))[0].r).toBe('reception')
+      await denied(as('bia', (q) => q(`update profiles set role = 'reception' where id = $1`, [ids.bia])))
+    })
+    it('cadastra, lista (CPF mascarado), edita campos administrativos e gera código', async () => {
+      const a = await save('rec', null, { full_name: 'Paciente da Recepção', cpf: '98765432100', first_consultation: '2026-03-03', responsible_professional_id: ids.dr2 })
+      expect(a.record_number).toMatch(/^CEF-\d{6}$/)
+      const l = await rows('rec', `select * from registry_list('Paciente da Recepção')`)
+      expect(l).toHaveLength(1)
+      expect(JSON.stringify(l)).not.toContain('98765432100')
+      const code = (await rows('rec', `select registry_generate_code($1) c`, [a.id]))[0].c
+      expect(code).toMatch(/^[0-9A-F]{10}$/)
+      const g = (await rows('rec', `select registry_get($1) g`, [a.id]))[0].g
+      expect(g.access).toBe('staff')
+      expect((await rows('rec', `select * from responsible_options()`)).length).toBeGreaterThan(0)
+      expect((await rows('rec', `select * from registry_history($1)`, [a.id])).length).toBeGreaterThan(0)
+    })
+    it('não acessa NENHUM dado clínico, administrativo ou de outros usuários', async () => {
+      for (const t of ['headache_attacks', 'daily_logs', 'medication_administrations', 'clinical_notes', 'menstrual_cycles', 'patients', 'care_links', 'follow_ups', 'consents'])
+        expect(await rows('rec', t === 'patients' ? `select 1 from patients where id <> auth.uid()` : `select 1 from ${t}`), t).toHaveLength(t === 'consents' ? 1 : 0)
+      expect(await rows('rec', `select id from profiles`)).toHaveLength(1)
+      await denied(as('rec', (q) => q(`select admin_stats()`)))
+      await denied(as('rec', (q) => q(`select * from admin_audit_log()`)))
+      await denied(as('rec', (q) => q(`select * from professional_overview()`)))
+      await denied(as('rec', (q) => q(`select open_patient_record($1)`, [ids.bia])))
+    })
+    it('médico e paciente não usam as funções de recepção', async () => {
+      await denied(as('bia', (q) => q(`select * from responsible_options()`)))
+      await denied(as('dr', (q) => q(`select * from responsible_options()`)))
+      await denied(save('bia', null, { full_name: 'x' }))
+    })
+  })
 })

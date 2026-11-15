@@ -4,7 +4,7 @@
  */
 export type LocalDateTime = string
 export type DateOnly = string // 'YYYY-MM-DD'
-export type Role = 'patient' | 'professional' | 'admin'
+export type Role = 'patient' | 'professional' | 'admin' | 'reception'
 export type AccountStatus = 'active' | 'suspended'
 export type ConsentType = 'personal_data' | 'health_data' | 'professional_sharing' | 'research'
 

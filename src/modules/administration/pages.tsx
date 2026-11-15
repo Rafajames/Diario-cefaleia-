@@ -15,7 +15,7 @@ import {
 } from './service'
 import { parseSetting } from './settings-schema'
 
-const ROLE: Record<string, string> = { patient: 'Paciente', professional: 'Profissional', admin: 'Administrador' }
+const ROLE: Record<string, string> = { patient: 'Paciente', professional: 'Profissional', admin: 'Administrador', reception: 'Recepção' }
 const useProfilesMap = () => {
   const q = useQuery({ queryKey: ['admin-profiles'], queryFn: fetchProfiles })
   const map = useMemo(() => new Map((q.data ?? []).map((p) => [p.id, p])), [q.data])
@@ -128,8 +128,9 @@ export function AdminUsersPage() {
               <span className="flex flex-wrap gap-1">
                 <Button small variant="secondary" disabled={act.busy} onClick={() => confirm(p.status === 'active' ? `Suspender ${p.email}?` : `Reativar ${p.email}?`) && act.run(() => setStatus(p.id, p.status === 'active' ? 'suspended' : 'active'))}>
                   {p.status === 'active' ? 'Suspender' : 'Reativar'}</Button>
-                <Button small variant="ghost" disabled={act.busy} onClick={() => confirm(`Alterar o perfil de ${p.email} para ${p.role === 'patient' ? 'Profissional' : 'Paciente'}?`) && act.run(() => setRole(p.id, p.role === 'patient' ? 'professional' : 'patient'))}>
-                  Tornar {p.role === 'patient' ? 'profissional' : 'paciente'}</Button>
+                <Select aria-label={`Perfil de ${p.email}`} value={p.role} disabled={act.busy}
+                  onChange={(e) => { const r = e.target.value as 'patient' | 'professional' | 'reception'; if (r !== p.role && confirm(`Alterar o perfil de ${p.email} para ${ROLE[r]}?`)) act.run(() => setRole(p.id, r)) }}
+                  options={[{ value: 'patient', label: 'Paciente' }, { value: 'professional', label: 'Profissional' }, { value: 'reception', label: 'Recepção' }]} />
               </span>
             ),
           ])} />
@@ -179,7 +180,7 @@ export function AdminInvitesPage() {
   const me = useProfile()
   const q = useQuery({ queryKey: ['admin-invites'], queryFn: fetchInvites })
   const [email, setEmail] = useState('')
-  const [role, setRoleValue] = useState<'patient' | 'professional'>('patient')
+  const [role, setRoleValue] = useState<'patient' | 'professional' | 'reception'>('patient')
   const [copied, setCopied] = useState(false)
   const act = useAction()
   const link = `${window.location.origin}/cadastro`
@@ -192,7 +193,7 @@ export function AdminInvitesPage() {
         <p className="mb-3 text-sm text-muted">O convite libera o cadastro para este e-mail (mesmo com o cadastro público desativado) e define o perfil da conta. É assim que profissionais são cadastrados. Válido por 14 dias.</p>
         <div className="grid gap-3 sm:grid-cols-[1fr_auto_auto] sm:items-end">
           <Field label="E-mail" error={act.fields.email}><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} /></Field>
-          <Field label="Perfil"><Select value={role} onChange={(e) => setRoleValue(e.target.value as 'patient' | 'professional')} options={[{ value: 'patient', label: 'Paciente' }, { value: 'professional', label: 'Profissional de saúde' }]} /></Field>
+          <Field label="Perfil"><Select value={role} onChange={(e) => setRoleValue(e.target.value as 'patient' | 'professional' | 'reception')} options={[{ value: 'patient', label: 'Paciente' }, { value: 'professional', label: 'Profissional de saúde' }, { value: 'reception', label: 'Recepção' }]} /></Field>
           <Button disabled={act.busy || !email} onClick={() => act.run(() => createInvite(email, role, me.id), () => setEmail(''))}>Convidar</Button>
         </div>
         {act.error && !act.fields.email && <div className="mt-2"><Alert tone="bad">{act.error}</Alert></div>}

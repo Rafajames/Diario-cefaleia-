@@ -51,7 +51,7 @@ function Home() {
 function RequireAny({ children }: { children: ReactNode }) {
   const { profile, loading } = useAuth()
   if (loading) return <Spinner />
-  return <RequireArea area={profile?.role === 'admin' ? 'admin' : profile?.role === 'professional' ? 'professional' : 'patient'}>{children}</RequireArea>
+  return <RequireArea area={profile?.role === 'admin' ? 'admin' : profile?.role === 'professional' ? 'professional' : profile?.role === 'reception' ? 'reception' : 'patient'}>{children}</RequireArea>
 }
 
 function AppRoutes() {
@@ -77,6 +77,8 @@ function AppRoutes() {
           <Route path="/perfil" element={patient(<ProfilePage />)} />
           <Route path="/conta" element={<ProfilePage />} />
           <Route path="/profissional" element={area('professional', <ProfessionalDashboardPage />)} />
+          <Route path="/recepcao" element={area('reception', <AdminRegistryListPage />)} />
+          <Route path="/recepcao/:id" element={area('reception', <AdminRegistryEditPage />)} />
           <Route path="/admin/cadastros" element={area('admin', <AdminRegistryListPage />)} />
           <Route path="/admin/cadastros/:id" element={area('admin', <AdminRegistryEditPage />)} />
           <Route path="/cadastro" element={patient(<MyRegistryPage />)} />

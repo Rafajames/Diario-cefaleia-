@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.0
+- Perfil **Recepção**: cadastra e edita pacientes (sem dados clínicos), tela `/recepcao`; atribuído pelo admin (tela Usuários, convite ou SQL).
+- Migration 0007; `responsible_options()` para escolher responsável sem ler `profiles`.
+
 ## 0.4.0 — 2026-11-15
 
 - Cadastro principal do paciente (Fase 1): ficha única com 8 abas, rascunho, CPF validado e único, prontuário automático, cadastro pela equipe sem conta com código de ativação, auditoria sem valores, acesso só por funções do banco. Migration `0006`. Detalhes em `docs/modules/patient-registry.md`. Anexos ficam para a Fase 2.

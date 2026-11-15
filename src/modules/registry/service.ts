@@ -12,7 +12,7 @@ export interface Registry {
 }
 export interface RegistryView {
   registry: Registry
-  access: 'owner' | 'admin' | 'responsible' | 'clinician'
+  access: 'owner' | 'admin' | 'staff' | 'responsible' | 'clinician'
   linked: boolean
   missing: string[]
   activation_pending: boolean
@@ -65,7 +65,5 @@ export async function registrySave(id: string | null, changes: Record<string, st
 export interface ProfessionalOption { id: string; full_name: string; email: string }
 /** Médicos que podem ser "responsável" (administração). */
 export async function fetchResponsibleOptions(): Promise<ProfessionalOption[]> {
-  const rows = await unwrap<(ProfessionalOption & { role: string; clinical_enabled: boolean })[]>(
-    supabase().from('profiles').select('id, full_name, email, role, clinical_enabled').in('role', ['professional', 'admin']).eq('status', 'active').order('full_name'))
-  return rows.filter((r) => r.role === 'professional' || r.clinical_enabled)
+  return unwrap<ProfessionalOption[]>(supabase().rpc('responsible_options'))
 }
