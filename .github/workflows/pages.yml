@@ -1,0 +1,43 @@
+name: Publicar (GitHub Pages)
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      # Valores PÚBLICOS por natureza (URL do projeto e chave publishable/anon).
+      # Nunca coloque aqui a service_role nem qualquer chave secreta.
+      VITE_SUPABASE_URL: https://olzmcqrlsupkzxvotnmg.supabase.co
+      VITE_SUPABASE_ANON_KEY: sb_publishable_B0fv6Q3w9G-qvFLuYds12Q_lsUHj_4T
+      VITE_BASE: /Diario-cefaleia-/
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Fallback de SPA (rotas diretas no Pages)
+        run: cp dist/index.html dist/404.html
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
