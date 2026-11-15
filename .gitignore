@@ -1,0 +1,19 @@
+node_modules/
+dist/
+dev-dist/
+.env
+.env.*
+!.env.example
+*.local
+*.log
+.DS_Store
+coverage/
+.tmp/
+# Nunca versionar dados reais, backups ou chaves
+*.dump
+*.backup
+*.pem
+*.key
+backups/
+supabase/.temp/
+supabase/.branches/

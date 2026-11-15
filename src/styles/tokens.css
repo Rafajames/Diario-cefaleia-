@@ -1,0 +1,34 @@
+/*
+ * Tokens de identidade visual — CENDOR.
+ * Paleta inicial aproximada, inspirada na fachada da clínica. Para ajustar a identidade,
+ * altere SOMENTE este arquivo: todas as telas usam estas variáveis (bg-brand, text-info etc.).
+ */
+@theme {
+  --color-brand: #206850; /* verde institucional (principal) */
+  --color-brand-dark: #174d3b;
+  --color-brand-soft: #e4f1ec;
+  --color-accent: #00c8a8; /* turquesa (complementar) */
+  --color-accent-soft: #dcf7f2;
+  --color-info: #285898; /* azul (elementos informativos) */
+  --color-info-soft: #e6edf7;
+  --color-surface: #f2f4f3; /* cinza muito claro */
+  --color-card: #ffffff;
+  --color-ink: #1c2b26;
+  --color-muted: #5d6e68;
+  --color-line: #d9e0dd;
+  --color-danger: #b3261e;
+  --color-danger-soft: #fbe9e7;
+  --color-warn: #8a5a00;
+  --color-warn-soft: #fff4d6;
+
+  /* Calendário */
+  --color-day-none: #e3e7e5; /* sem informação */
+  --color-day-free: #37a56f; /* dia sem dor confirmado */
+  --color-day-mild: #f2c94c; /* dor leve */
+  --color-day-moderate: #f2994a; /* dor moderada */
+  --color-day-severe: #d64545; /* dor intensa */
+  --color-day-unrated: #b08bbf; /* dor sem intensidade informada */
+  --color-day-menstruation: #2f7fd1; /* menstruação */
+
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
