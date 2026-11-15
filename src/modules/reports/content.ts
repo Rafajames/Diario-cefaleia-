@@ -31,6 +31,8 @@ export interface ReportInput {
   menstruationAuthorized: boolean
   generatedAt: string
   generatedBy: string
+  /** Resumo para consulta: só as seções essenciais, sem listar crise a crise nem observações */
+  compact?: boolean
 }
 
 export interface ReportContent {
@@ -184,7 +186,7 @@ export function buildReportContent(i: ReportInput): ReportContent {
 
   return {
     institution: INSTITUTION.full,
-    title: `${INSTITUTION.appName} — Relatório individual`,
+    title: `${INSTITUTION.appName} — ${i.compact ? 'Resumo para consulta' : 'Relatório individual'}`,
     subtitle: `${i.patientName || 'Paciente'} · período de referência: ${fmtDate(i.period.from)} a ${fmtDate(i.period.to)}`,
     generatedLine: `Gerado em ${i.generatedAt} por ${i.generatedBy}`,
     disclaimers: [
@@ -192,6 +194,6 @@ export function buildReportContent(i: ReportInput): ReportContent {
       incomplete.length ? `Dados incompletos: ${incomplete.join('; ')}.` : 'Sem pendências de preenchimento identificadas no período.',
       'Este relatório não contém diagnósticos automáticos nem recomendações terapêuticas.',
     ],
-    sections,
+    sections: i.compact ? sections.filter((x) => /^(1|2|3|4|5|9|10|11|15)\./.test(x.title)) : sections,
   }
 }

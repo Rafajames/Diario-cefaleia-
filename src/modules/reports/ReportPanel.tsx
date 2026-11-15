@@ -32,18 +32,18 @@ export function ReportPanel() {
     setBusy(kind); setError('')
     try { await fn() } catch (e) { setError(friendlyError(e)) } finally { setBusy('') }
   }
-  const pdf = () => run('pdf', async () => {
+  const pdf = (compact = false) => run(compact ? 'pdf-resumo' : 'pdf', async () => {
     if (!ev.result) return
     const content = buildReportContent({
       patientName: scope.patientName, patient: patient.data ?? null, period: state.period, previousPeriod: ev.result.previousPeriod,
       current: ev.result.current, comparison: ev.result.comparison, dataset: ev.result.dataset, preventives: preventives.data ?? [], notes: notes.data ?? [],
-      menstruationAuthorized: scope.menstruationVisible, generatedAt: new Date().toLocaleString('pt-BR'), generatedBy: me.full_name || me.email,
+      menstruationAuthorized: scope.menstruationVisible, generatedAt: new Date().toLocaleString('pt-BR'), generatedBy: me.full_name || me.email, compact,
     })
     const { renderReportPdf } = await import('./pdf')
     const blob = await renderReportPdf(content)
-    await logReportEvent(scope.patientId, 'export_pdf', tag)
+    await logReportEvent(scope.patientId, 'export_pdf', compact ? `resumo ${tag}` : tag)
     const url = URL.createObjectURL(blob)
-    const a = document.createElement('a'); a.href = url; a.download = `diario-cefaleia_relatorio_${tag}.pdf`; a.click()
+    const a = document.createElement('a'); a.href = url; a.download = `diario-cefaleia_${compact ? 'resumo' : 'relatorio'}_${tag}.pdf`; a.click()
     setTimeout(() => URL.revokeObjectURL(url), 2000)
   })
   const csv = (name: string, build: () => string) => run(name, async () => {
@@ -61,7 +61,8 @@ export function ReportPanel() {
             <p className="mb-3 text-sm text-muted">O PDF reúne identificação, dias com cefaleia, crises, intensidade, localização, duração, sintomas, medicamentos, resposta, recorrências,
               {scope.menstruationVisible ? ' ciclo menstrual,' : ''} fatores associados, hábitos, evolução comparativa e observações. Inclui aviso de que os registros são autorrelatados e a indicação de dados incompletos.</p>
             <div className="flex flex-wrap gap-2">
-              <Button disabled={!!busy} onClick={pdf}>{busy === 'pdf' ? 'Gerando…' : 'Gerar relatório em PDF'}</Button>
+              <Button disabled={!!busy} onClick={() => pdf(false)}>{busy === 'pdf' ? 'Gerando…' : 'Gerar relatório em PDF'}</Button>
+              <Button variant="secondary" disabled={!!busy} onClick={() => pdf(true)}>{busy === 'pdf-resumo' ? 'Gerando…' : 'Resumo para consulta (PDF)'}</Button>
               <Button variant="secondary" disabled={!!busy} onClick={() => csv('crises', () => attacksCsv(ev.result!.dataset, state.period))}>CSV — crises</Button>
               <Button variant="secondary" disabled={!!busy} onClick={() => csv('medicamentos', () => administrationsCsv(ev.result!.dataset, state.period))}>CSV — medicamentos</Button>
               <Button variant="secondary" disabled={!!busy} onClick={() => csv('registro-diario', () => dailyLogsCsv(ev.result!.dataset, state.period))}>CSV — registro diário</Button>

@@ -183,7 +183,7 @@ await p.context().close()
 p = await open({ width: 1280, height: 850 })
 await at(p, 'profissional', async () => {
   await login(p, 'pro@teste.dev')
-  await p.getByText('Pacientes vinculados').waitFor()
+  await p.getByText('Lista de pacientes').waitFor()
   await p.getByRole('button', { name: 'Abrir' }).click()
   await p.getByText('Informações declaradas pelo paciente').waitFor()
   await shot(p, '08-profissional-resumo')
@@ -199,8 +199,12 @@ await at(p, 'profissional', async () => {
   await p.locator('.recharts-surface').first().waitFor()
   await shot(p, '09-profissional-evolucao')
   if (!db.access_logs.some((l) => l.action === 'open_record')) throw new Error('abertura de prontuário não foi registrada')
+  await p.goto(`${base}/profissional/demo`)
+  await p.getByText('DEMONSTRAÇÃO:').waitFor()
+  await p.getByRole('tab', { name: 'Evolução' }).click()
+  await shot(p, '09b-profissional-demo')
   await p.goto(`${base}/admin`)
-  await p.getByText('Pacientes vinculados').waitFor() // profissional não entra na administração
+  await p.getByText('Lista de pacientes').waitFor() // profissional não entra na administração
 })
 await p.context().close()
 

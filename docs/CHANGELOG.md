@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.0 — 2026-11-15
+
+- Painel do médico: tela inicial com orientação, cartões de resumo, busca e filtro por situação, exportação da lista em CSV, retornos planejados (tabela `follow_ups`, visível ao paciente) e convite de vínculo pelo e-mail do paciente (`request_patient_link`: resposta sempre igual, vínculo nasce pendente).
+- Paciente de demonstração (`/profissional/demo`): dados fictícios gerados no navegador, nada é gravado.
+- Resumo para consulta em PDF (versão compacta do relatório), modelos de estrutura para observações (só títulos em branco) e perfil profissional (conselho, número, especialidade).
+- Migration `0005_painel_medico.sql`.
+
 ## 0.2.0 — 2026-11-15
 
 - Logo oficial do projeto (variantes clara e escura), ícones do PWA e favicon.

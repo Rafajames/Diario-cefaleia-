@@ -320,4 +320,27 @@ describe.skipIf(!url)('segurança do banco (RLS)', () => {
       await denied(as('root2', (q) => q(`select open_patient_record($1)`, [ids.bia])))
     })
   })
+
+  describe('painel do médico: retornos e convite de vínculo', () => {
+    it('retorno só por quem tem vínculo ativo e consentimento; o paciente lê; terceiros não', async () => {
+      await as('root', (q) => q(`insert into follow_ups (patient_id, professional_id, next_return, reason) values ($1, $2, '2030-01-10', 'Revisão')`, [ids.bia, ids.root]))
+      await denied(as('root2', (q) => q(`insert into follow_ups (patient_id, professional_id, next_return) values ($1, $2, '2030-01-10')`, [ids.bia, ids.root2])))
+      await denied(as('dr2', (q) => q(`insert into follow_ups (patient_id, professional_id, next_return) values ($1, $2, '2030-01-10')`, [ids.bia, ids.dr2])))
+      expect(await rows('bia', `select next_return::text from follow_ups`)).toHaveLength(1)
+      expect(await rows('root2', `select id from follow_ups`)).toHaveLength(0)
+      expect(await rows('dr2', `select id from follow_ups`)).toHaveLength(0)
+    })
+    it('convite pelo e-mail: cria vínculo pendente e a resposta não revela se o e-mail existe', async () => {
+      await as('dr2', (q) => q(`select request_patient_link('nao-existe@teste.dev')`))
+      await as('dr2', (q) => q(`select request_patient_link('BIA@teste.dev')`))
+      await as('dr2', (q) => q(`select request_patient_link('bia@teste.dev')`))
+      const l = (await db.query(`select status from care_links where patient_id = $1 and grantee_id = $2`, [ids.bia, ids.dr2])).rows
+      expect(l).toEqual([{ status: 'pending' }])
+      expect(await rows('dr2', `select id from patients where id = $1`, [ids.bia])).toHaveLength(0)
+    })
+    it('paciente e administrador não habilitado não usam o convite', async () => {
+      await denied(as('bia', (q) => q(`select request_patient_link('ana@teste.dev')`)))
+      await denied(as('root2', (q) => q(`select request_patient_link('ana@teste.dev')`)))
+    })
+  })
 })

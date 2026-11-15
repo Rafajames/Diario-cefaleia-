@@ -12,6 +12,7 @@ import { REQUIRED_CONSENTS } from '@/modules/authentication/access'
 import { password as passwordRule } from '@/modules/authentication/schemas'
 import { fetchConsents, fetchPublicConfig, recordConsents, updatePassword } from '@/modules/authentication/service'
 import { fetchNotes } from '@/modules/professional-dashboard/service'
+import { ProfessionalCard } from '@/modules/professional-dashboard/ProfessionalCard'
 import {
   exportAllMyData, fetchAccessToMe, fetchMyDeletionRequests, fetchMyLinks, fetchPatient, requestDeletion, shareWithProfessional, updateLink, updateName, updatePatient,
 } from './service'
@@ -25,6 +26,7 @@ export function ProfilePage() {
     <div className="space-y-4">
       <PageTitle>{isPatient ? 'Meu perfil' : 'Minha conta'}</PageTitle>
       <AccountCard />
+      {(me.role === 'professional' || (me.role === 'admin' && me.clinical_enabled)) && <ProfessionalCard />}
       {isPatient && <PatientDataCard />}
       <ConsentsCard />
       {isPatient && <SharingCard />}
