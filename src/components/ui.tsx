@@ -5,7 +5,7 @@ import type { Option } from '@/config/clinical-options'
 export const cx = (...parts: (string | false | null | undefined)[]) => parts.filter(Boolean).join(' ')
 
 const BTN = {
-  primary: 'bg-brand text-white hover:bg-brand-dark',
+  primary: 'bg-brand text-on-brand hover:bg-brand-dark',
   secondary: 'bg-card text-brand border border-brand hover:bg-brand-soft',
   ghost: 'text-brand hover:bg-brand-soft',
   danger: 'bg-danger text-white hover:opacity-90',
@@ -49,7 +49,7 @@ export function Section({ title, hint, open, children }: { title: string; hint?:
   )
 }
 
-const INPUT = 'w-full rounded-lg border border-line bg-white px-3 py-2 text-ink placeholder:text-muted/70 disabled:bg-surface disabled:text-muted'
+const INPUT = 'w-full rounded-lg border border-muted bg-card px-3 py-2 text-ink placeholder:text-muted/70 disabled:bg-surface disabled:text-muted'
 export const Input = (p: InputHTMLAttributes<HTMLInputElement>) => <input {...p} className={cx(INPUT, p.className)} />
 export const Textarea = (p: TextareaHTMLAttributes<HTMLTextAreaElement>) => <textarea rows={3} {...p} className={cx(INPUT, p.className)} />
 export function Select({ options, placeholder, ...p }: SelectHTMLAttributes<HTMLSelectElement> & { options: Option[]; placeholder?: string }) {
@@ -103,7 +103,7 @@ export function Chips({ options, value, onChange, single, disabled }: { options:
         const on = value.includes(o.value)
         return (
           <button key={o.value} type="button" disabled={disabled} aria-pressed={on} onClick={() => toggle(o.value)}
-            className={cx('rounded-full border px-3 py-1.5 text-sm transition', on ? 'border-brand bg-brand text-white' : 'border-line bg-white text-ink hover:border-brand')}>
+            className={cx('rounded-full border px-3 py-1.5 text-sm transition', on ? 'border-brand bg-brand text-on-brand' : 'border-line bg-card text-ink hover:border-brand')}>
             {o.label}
           </button>
         )
@@ -129,7 +129,7 @@ export function IntensityInput({ value, onChange, disabled }: { value: number | 
       <div className="flex flex-wrap gap-1" role="radiogroup" aria-label="Intensidade de 0 a 10">
         {Array.from({ length: 11 }, (_, n) => (
           <button key={n} type="button" role="radio" aria-checked={value === n} disabled={disabled} onClick={() => onChange(value === n ? null : n)}
-            className={cx('h-9 w-9 rounded-lg border text-sm font-semibold transition', value === n ? cx(INTENSITY_BG(n), 'border-ink ring-2 ring-ink') : 'border-line bg-white hover:border-brand')}>
+            className={cx('h-9 w-9 rounded-lg border text-sm font-semibold transition', value === n ? cx(INTENSITY_BG(n), 'border-ink ring-2 ring-ink') : 'border-line bg-card hover:border-brand')}>
             {n}
           </button>
         ))}

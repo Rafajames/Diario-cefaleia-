@@ -1,21 +1,23 @@
 /*
  * Tokens de identidade visual — CENDOR.
- * Paleta inicial aproximada, inspirada na fachada da clínica. Para ajustar a identidade,
- * altere SOMENTE este arquivo: todas as telas usam estas variáveis (bg-brand, text-info etc.).
+ * Cores extraídas da logo (tema claro e escuro). Tons claros e cinzas são derivados dessas cores.
+ * Para ajustar a identidade, altere SOMENTE este arquivo (tema claro aqui e escuro em index.css):
+ * todas as telas usam estas variáveis (bg-brand, text-info etc.).
  */
 @theme {
-  --color-brand: #206850; /* verde institucional (principal) */
-  --color-brand-dark: #174d3b;
-  --color-brand-soft: #e4f1ec;
-  --color-accent: #00c8a8; /* turquesa (complementar) */
-  --color-accent-soft: #dcf7f2;
-  --color-info: #285898; /* azul (elementos informativos) */
-  --color-info-soft: #e6edf7;
-  --color-surface: #f2f4f3; /* cinza muito claro */
+  --color-brand: #02676e; /* verde-azulado da logo (principal, tema claro) */
+  --color-brand-dark: #01383c; /* fundo escuro da logo */
+  --color-brand-soft: #e0f4f2;
+  --color-on-brand: #ffffff; /* texto sobre botão principal */
+  --color-accent: #29f2d0; /* turquesa da logo (decorativo, não usar para texto) */
+  --color-accent-soft: #ddfbf6;
+  --color-info: #004868; /* azul-marinho da logo */
+  --color-info-soft: #e3eef3;
+  --color-surface: #f3f8f8; /* fundo da página */
   --color-card: #ffffff;
-  --color-ink: #1c2b26;
-  --color-muted: #5d6e68;
-  --color-line: #d9e0dd;
+  --color-ink: #01383c; /* texto principal */
+  --color-muted: #4a6b6e; /* texto de apoio (contraste AA) */
+  --color-line: #c5dcdc; /* bordas decorativas */
   --color-danger: #b3261e;
   --color-danger-soft: #fbe9e7;
   --color-warn: #8a5a00;

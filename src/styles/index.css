@@ -8,3 +8,22 @@ input, select, textarea, button { font: inherit; }
 details > summary { cursor: pointer; list-style: none; }
 details > summary::-webkit-details-marker { display: none; }
 @media print { .no-print { display: none !important; } }
+
+/* Tema escuro (segue a configuração do aparelho). Cores da logo escura. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-brand: #29f2d0;
+    --color-brand-dark: #00e0e0;
+    --color-brand-soft: #00454a;
+    --color-on-brand: #01383c;
+    --color-accent: #00c8a8;
+    --color-accent-soft: #00454a;
+    --color-info: #29f2d0;
+    --color-info-soft: #003a40;
+    --color-surface: #01383c;
+    --color-card: #003038;
+    --color-ink: #fefefe;
+    --color-muted: #a9cfcc;
+    --color-line: #0a5a60;
+  }
+}

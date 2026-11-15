@@ -17,7 +17,8 @@ export function AuthShell({ title, children, footer }: { title: string; children
   return (
     <main className="mx-auto flex min-h-dvh max-w-md flex-col justify-center gap-4 p-4">
       <header className="text-center">
-        <img src={`${import.meta.env.BASE_URL}logo-claro.png`} alt="Diário da Cefaleia" className="mx-auto mb-2 h-14 w-14" />
+        <img src={`${import.meta.env.BASE_URL}logo-claro.png`} alt="Diário da Cefaleia" className="mx-auto mb-2 h-20 w-20 dark:hidden" />
+        <img src={`${import.meta.env.BASE_URL}logo-escuro.png`} alt="" aria-hidden className="mx-auto mb-2 hidden h-20 w-20 dark:block" />
         <p className="text-2xl font-bold text-brand">{INSTITUTION.appName}</p>
         <p className="text-xs text-muted">{INSTITUTION.full}</p>
       </header>
@@ -44,12 +45,14 @@ export function LoginPage() {
   if (profile) return <Navigate to={homeFor(profile.role)} replace />
   return (
     <AuthShell title="Entrar" footer={<>Ainda não tem conta? <Link className="font-medium text-brand" to="/cadastro">Criar conta</Link></>}>
+      <p className="mb-3 text-sm text-muted">Registre suas crises, medicamentos e ciclo em um só lugar, e acompanhe a evolução com a equipe que você autorizar.</p>
       <form className="space-y-3" onSubmit={f.handleSubmit(s.run)} noValidate>
         <Field label="E-mail" error={f.formState.errors.email?.message}><Input type="email" autoComplete="email" {...f.register('email')} /></Field>
         <Field label="Senha" error={f.formState.errors.password?.message}><Input type="password" autoComplete="current-password" {...f.register('password')} /></Field>
         {s.error && <Alert tone="bad">{s.error}</Alert>}
         <Button type="submit" className="w-full" disabled={s.busy}>{s.busy ? 'Entrando…' : 'Entrar'}</Button>
         <p className="text-center text-sm"><Link className="text-brand" to="/recuperar-senha">Esqueci minha senha</Link></p>
+        <p className="text-center text-xs text-muted">Seus dados de saúde são sensíveis: você decide quem pode vê-los.</p>
       </form>
     </AuthShell>
   )
