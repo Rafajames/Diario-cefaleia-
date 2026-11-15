@@ -73,7 +73,7 @@ export function AppLayout() {
 
 const Brand = () => (
   <div className="flex items-center gap-2 border-b border-line p-4">
-    <img src="/icon.svg" alt="" className="h-9 w-9" />
+    <img src={`${import.meta.env.BASE_URL}icon.svg`} alt="" className="h-9 w-9" />
     <div><p className="font-bold leading-tight text-brand">{INSTITUTION.appName}</p><p className="text-[11px] text-muted">{INSTITUTION.short}</p></div>
   </div>
 )
