@@ -14,6 +14,7 @@ import { CalendarView } from '@/modules/calendar/CalendarView'
 import { EvolutionView, HabitsCard, IntensityCard, ResponseCard, TriggersCard } from '@/modules/clinical-evolution/EvolutionView'
 import { buildEvolution, useEvolution } from '@/modules/clinical-evolution/useEvolution'
 import { useSettings } from '@/services/settings'
+import { RegistryForm } from '@/modules/registry/RegistryForm'
 import { buildDemoDataset, DEMO_NAME } from './demo'
 import { AttackList } from '@/modules/headache-attacks/AttackList'
 import { PreventiveList } from '@/modules/medications/MedicationsPage'
@@ -148,7 +149,7 @@ function InviteCard() {
 
 const TABS = [
   ['resumo', 'Resumo'], ['calendario', 'Calendário'], ['crises', 'Crises'], ['medicamentos', 'Medicamentos'], ['resposta', 'Resposta terapêutica'],
-  ['menstruacao', 'Menstruação'], ['habitos', 'Hábitos'], ['evolucao', 'Evolução'], ['relatorios', 'Relatórios'], ['observacoes', 'Observações clínicas'],
+  ['menstruacao', 'Menstruação'], ['habitos', 'Hábitos'], ['evolucao', 'Evolução'], ['relatorios', 'Relatórios'], ['observacoes', 'Observações clínicas'], ['cadastro', 'Cadastro'],
 ].map(([value, label]) => ({ value, label }))
 
 export function PatientRecordPage() {
@@ -171,7 +172,7 @@ function RecordTabs() {
   const [tab, setTab] = useState('resumo')
   const state = usePeriod('90')
   const ev = useEvolution(state.period)
-  const usesPeriod = !['calendario', 'relatorios', 'observacoes'].includes(tab)
+  const usesPeriod = !['calendario', 'relatorios', 'observacoes', 'cadastro'].includes(tab)
   const r = ev.result
   const inPeriod = (d: string) => d >= state.period.from && d <= state.period.to
   return (
@@ -198,6 +199,7 @@ function RecordTabs() {
       {tab === 'evolucao' && r && <EvolutionView r={r} />}
       {tab === 'relatorios' && <ReportPanel />}
       {tab === 'observacoes' && <NotesPanel />}
+      {tab === 'cadastro' && <RegistryForm mode="view" userId={scope.patientId} />}
     </div>
   )
 }

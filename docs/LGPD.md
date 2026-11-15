@@ -81,3 +81,7 @@ histórico de alterações, validação no servidor, segredos fora do repositór
 - Relatório de Impacto à Proteção de Dados (RIPD), recomendado por envolver dados sensíveis em escala.
 - Tratamento de dados de menores de idade: **[definir]** se serão aceitos e como obter consentimento dos responsáveis.
 - Plano de resposta a incidentes e canal de atendimento ao titular.
+
+## Cadastro do paciente
+
+Coletamos o necessário ao atendimento; quase todos os campos são opcionais e o cadastro pode ficar incompleto. CPF, documentos e dados de saúde são dados pessoais que exigem base legal e consentimento registrado pelo paciente na conta. Cadastros feitos pela equipe antes de o paciente ter conta precisam de base legal definida pelo CENDOR (revisão jurídica pendente). O paciente consulta quem acessou e quem alterou sua ficha.

@@ -109,7 +109,7 @@ function PatientForm({ patient }: { patient: Patient }) {
   )
 }
 
-function ConsentsCard() {
+export function ConsentsCard() {
   const me = useProfile()
   const { consents, refresh } = useAuth()
   const cfg = useQuery({ queryKey: ['public-config'], queryFn: fetchPublicConfig })

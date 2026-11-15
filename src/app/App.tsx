@@ -21,6 +21,10 @@ const ReportPanel = lazy(() => import('@/modules/reports/ReportPanel').then((m) 
 const pro = () => import('@/modules/professional-dashboard/pages')
 const ProfessionalDashboardPage = lazy(() => pro().then((m) => ({ default: m.ProfessionalDashboardPage })))
 const PatientRecordPage = lazy(() => pro().then((m) => ({ default: m.PatientRecordPage })))
+const reg = () => import('@/modules/registry/pages')
+const AdminRegistryListPage = lazy(() => reg().then((m) => ({ default: m.AdminRegistryListPage })))
+const AdminRegistryEditPage = lazy(() => reg().then((m) => ({ default: m.AdminRegistryEditPage })))
+const MyRegistryPage = lazy(() => reg().then((m) => ({ default: m.MyRegistryPage })))
 const DemoPatientPage = lazy(() => pro().then((m) => ({ default: m.DemoPatientPage })))
 const adm = () => import('@/modules/administration/pages')
 const AdminDashboardPage = lazy(() => adm().then((m) => ({ default: m.AdminDashboardPage })))
@@ -73,6 +77,9 @@ function AppRoutes() {
           <Route path="/perfil" element={patient(<ProfilePage />)} />
           <Route path="/conta" element={<ProfilePage />} />
           <Route path="/profissional" element={area('professional', <ProfessionalDashboardPage />)} />
+          <Route path="/admin/cadastros" element={area('admin', <AdminRegistryListPage />)} />
+          <Route path="/admin/cadastros/:id" element={area('admin', <AdminRegistryEditPage />)} />
+          <Route path="/cadastro" element={patient(<MyRegistryPage />)} />
           <Route path="/profissional/demo" element={area('professional', <DemoPatientPage />)} />
           <Route path="/profissional/pacientes/:id" element={area('professional', <PatientRecordPage />)} />
           <Route path="/admin" element={area('admin', <AdminDashboardPage />)} />

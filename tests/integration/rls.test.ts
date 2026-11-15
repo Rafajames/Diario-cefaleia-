@@ -343,4 +343,117 @@ describe.skipIf(!url)('segurança do banco (RLS)', () => {
       await denied(as('root2', (q) => q(`select request_patient_link('ana@teste.dev')`)))
     })
   })
+
+  describe('cadastro principal do paciente', () => {
+    const save = (user: string, id: string | null, data: object) =>
+      as(user, async (q) => (await q(`select registry_save($1, $2::jsonb) r`, [id, JSON.stringify(data)])).rows[0].r)
+    const regId = async (user: string) => (await db.query(`select id from patient_registry where user_id = $1`, [ids[user]])).rows[0].id as string
+    const CPF1 = '52998224725', CPF2 = '39053344705', CPF3 = '11144477735'
+
+    it('valida CPF pelos dígitos verificadores', async () => {
+      const r = (await db.query(`select app.valid_cpf('529.982.247-25') a, app.valid_cpf('11111111111') b, app.valid_cpf('52998224724') c, app.valid_cpf('123') d`)).rows[0]
+      expect(r).toEqual({ a: true, b: false, c: false, d: false })
+    })
+    it('a ficha nasce automaticamente com a conta e a tabela não tem acesso direto', async () => {
+      expect(await regId('bia')).toBeTruthy()
+      await denied(as('bia', (q) => q(`select cpf from patient_registry`)))
+      await denied(as('root', (q) => q(`select cpf from patient_registry`)))
+      await denied(as('bia', (q) => q(`update patient_registry set cpf = '${CPF2}'`)))
+    })
+    it('somente a administração cria cadastros; rascunho é aceito; prontuário único e automático', async () => {
+      await denied(save('bia', null, { full_name: 'Fulana' }))
+      const a = await save('root', null, { full_name: 'Paciente Rascunho A' })
+      const b = await save('root', null, { full_name: 'Paciente Rascunho B' })
+      expect(a.record_number).toMatch(/^CEF-\d{6}$/)
+      expect(b.record_number).not.toBe(a.record_number)
+      expect(a.status).toBe('incomplete')
+      expect(a.missing).toContain('CPF')
+      await denied(save('root', null, { cpf: CPF1 })) // sem nome não inicia
+    })
+    it('rejeita CPF inválido, e-mail inválido e CPF duplicado', async () => {
+      const a = await save('root', null, { full_name: 'Dona A', cpf: CPF1 })
+      await denied(save('root', null, { full_name: 'Dona B', cpf: CPF1 }))
+      await denied(save('root', a.id, { cpf: '12345678900' }))
+      await denied(save('root', a.id, { email_primary: 'sem-arroba' }))
+      await denied(save('root', a.id, { weight_kg: 900 }))
+      await denied(save('root', a.id, { campo_inexistente: 'x' }))
+    })
+    it('o paciente edita a própria ficha, mas não os campos administrativos; completa e reflete no restante do app', async () => {
+      const id = await regId('bia')
+      await denied(save('bia', id, { first_consultation: '2026-01-10' }))
+      await denied(save('bia', id, { registration_status: 'inactive' }))
+      await denied(save('bia', id, { responsible_professional_id: ids.dr }))
+      const r = await save('bia', id, { full_name: 'Bia Completa', cpf: CPF2, birth_date: '1990-05-10', phone_mobile: '(95) 99999-0000', allergies: 'Nenhuma conhecida' })
+      expect(r.status).toBe('complete')
+      expect((await db.query(`select phone, birth_date::text bd from patients where id = $1`, [ids.bia])).rows[0]).toEqual({ phone: '(95) 99999-0000', bd: '1990-05-10' })
+      expect((await db.query(`select full_name from profiles where id = $1`, [ids.bia])).rows[0].full_name).toBe('Bia Completa')
+      await denied(save('ana', id, { full_name: 'Invasora' }))
+      await denied(as('ana', (q) => q(`select registry_get($1)`, [id])))
+    })
+    it('alterações nas telas antigas refletem na ficha (sem divergência)', async () => {
+      await as('bia', (q) => q(`update patients set phone = '(95) 98888-1111' where id = $1`, [ids.bia]))
+      expect((await db.query(`select phone_mobile from patient_registry where user_id = $1`, [ids.bia])).rows[0].phone_mobile).toBe('(95) 98888-1111')
+    })
+    it('menor de 18 anos exige responsável legal para completar', async () => {
+      const a = await save('root', null, { full_name: 'Menor Teste', cpf: CPF3, birth_date: '2020-01-01', phone_mobile: '95 90000-0000' })
+      expect(a.status).toBe('incomplete')
+      expect(a.missing.join()).toContain('Responsável legal')
+      const b = await save('root', a.id, { guardian_name: 'Mãe', guardian_cpf: CPF1.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4'), guardian_relationship: 'Mãe' })
+      expect(b.status).toBe('complete')
+    })
+    it('auditoria registra quem, quando e quais campos — nunca os valores', async () => {
+      const id = await regId('bia')
+      const h = await rows('bia', `select * from registry_history($1)`, [id])
+      expect(h.length).toBeGreaterThan(0)
+      const json = JSON.stringify(h)
+      expect(json).not.toContain(CPF2)
+      expect(json).toContain('cpf')
+      expect((await db.query(`select count(*)::int n from audit_log where new_data::text like $1 or old_data::text like $1`, [`%${CPF2}%`])).rows[0].n).toBe(0)
+      expect((await db.query(`select count(*)::int n from access_logs where detail like $1`, [`%${CPF2}%`])).rows[0].n).toBe(0)
+      await denied(as('dr2', (q) => q(`select * from registry_history($1)`, [id])))
+    })
+    it('médico: sem vínculo não lê; com vínculo ativo, consentimento e prontuário aberto lê e fica registrado', async () => {
+      await signup('duda', 'duda@teste.dev', { full_name: 'Duda' })
+      await consent('duda', 'personal_data'); await consent('duda', 'health_data'); await consent('duda', 'professional_sharing')
+      await as('duda', (q) => q(`insert into care_links (patient_id, grantee_id, status) values ($1, $2, 'active')`, [ids.duda, ids.dr2]))
+      await denied(as('dr2', (q) => q(`select registry_get(null, $1)`, [ids.duda]))) // sem abrir prontuário
+      await as('dr2', (q) => q(`select open_patient_record($1)`, [ids.duda]))
+      const g = (await rows('dr2', `select registry_get(null, $1) g`, [ids.duda]))[0].g
+      expect(g.access).toBe('clinician')
+      await denied(as('dr', (q) => q(`select registry_get(null, $1)`, [ids.duda]))) // outro médico, sem vínculo
+      expect(await rows('duda', `select action from access_logs where patient_id = $1 and action = 'open_registry'`, [ids.duda])).toHaveLength(1)
+      await denied(save('dr2', await regId('duda'), { full_name: 'Alterado pelo médico' }))
+    })
+    it('lista mascara o CPF; médico só vê os que é responsável; paciente não lista', async () => {
+      const list = await rows('root', `select * from registry_list($1)`, [CPF1])
+      expect(list).toHaveLength(1)
+      expect(list[0].cpf_masked).toBe('***.982.***-25')
+      expect(JSON.stringify(list)).not.toContain(CPF1)
+      expect(await rows('dr2', `select * from registry_list()`)).toHaveLength(0)
+      await save('root', list[0].id, { responsible_professional_id: ids.dr2, first_consultation: '2026-02-02' })
+      expect(await rows('dr2', `select * from registry_list()`)).toHaveLength(1)
+      expect((await rows('dr2', `select registry_get($1) g`, [list[0].id]))[0].g.access).toBe('responsible')
+      await denied(as('bia', (q) => q(`select * from registry_list()`)))
+    })
+    it('paciente cadastrado pela equipe ativa a conta com código (hash, validade e limite de tentativas)', async () => {
+      const reg = await save('root', null, { full_name: 'Pré Cadastro', cpf: '12345678909', birth_date: '1985-03-03', phone_mobile: '95 91111-2222' })
+      await denied(as('bia', (q) => q(`select registry_generate_code($1)`, [reg.id])))
+      const code = (await rows('root', `select registry_generate_code($1) c`, [reg.id]))[0].c as string
+      expect(code).toMatch(/^[0-9A-F]{10}$/)
+      expect((await db.query(`select position($1 in activation_code_hash::text) p from patient_registry where id = $2`, [code, reg.id])).rows[0].p).toBe(0)
+      await signup('edu', 'edu@teste.dev', { full_name: 'Edu Conta' })
+      const claim = (u: string, c: string) => as(u, async (q) => (await q(`select registry_claim($1, $2) ok`, [reg.record_number, c])).rows[0].ok)
+      expect(await claim('edu', 'ERRADO0000')).toBe(false)
+      expect(await claim('edu', code)).toBe(true)
+      expect((await db.query(`select user_id from patient_registry where id = $1`, [reg.id])).rows[0].user_id).toBe(ids.edu)
+      expect((await db.query(`select count(*)::int n from patient_registry where user_id = $1`, [ids.edu])).rows[0].n).toBe(1)
+      expect(await claim('edu', code)).toBe(false) // já usado
+      // limite de tentativas
+      const r2 = await save('root', null, { full_name: 'Pré Cadastro 2' })
+      const code2 = (await rows('root', `select registry_generate_code($1) c`, [r2.id]))[0].c as string
+      await signup('fe', 'fe@teste.dev', { full_name: 'Fe' })
+      for (let i = 0; i < 5; i++) await as('fe', (q) => q(`select registry_claim($1, 'XXXXXXXXXX')`, [r2.record_number]))
+      expect((await as('fe', async (q) => (await q(`select registry_claim($1, $2) ok`, [r2.record_number, code2])).rows[0].ok))).toBe(false)
+    })
+  })
 })

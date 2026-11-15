@@ -16,6 +16,7 @@ const NAV: Record<string, NavItem[]> = {
     { to: '/ciclo', label: 'Ciclo', icon: '◔' },
     { to: '/evolucao', label: 'Evolução', icon: '↗' },
     { to: '/relatorios', label: 'Relatórios', icon: '▤' },
+    { to: '/cadastro', label: 'Cadastro', icon: '▣' },
     { to: '/perfil', label: 'Perfil', icon: '☺' },
   ],
   professional: [
@@ -24,6 +25,7 @@ const NAV: Record<string, NavItem[]> = {
   ],
   admin: [
     { to: '/admin', label: 'Painel', icon: '◧', end: true },
+    { to: '/admin/cadastros', label: 'Cadastros', icon: '▣' },
     { to: '/admin/usuarios', label: 'Usuários', icon: '☰' },
     { to: '/admin/vinculos', label: 'Vínculos', icon: '⇄' },
     { to: '/admin/convites', label: 'Convites', icon: '✉' },

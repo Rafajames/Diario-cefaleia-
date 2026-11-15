@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.0 — 2026-11-15
+
+- Cadastro principal do paciente (Fase 1): ficha única com 8 abas, rascunho, CPF validado e único, prontuário automático, cadastro pela equipe sem conta com código de ativação, auditoria sem valores, acesso só por funções do banco. Migration `0006`. Detalhes em `docs/modules/patient-registry.md`. Anexos ficam para a Fase 2.
+
 ## 0.3.0 — 2026-11-15
 
 - Painel do médico: tela inicial com orientação, cartões de resumo, busca e filtro por situação, exportação da lista em CSV, retornos planejados (tabela `follow_ups`, visível ao paciente) e convite de vínculo pelo e-mail do paciente (`request_patient_link`: resposta sempre igual, vínculo nasce pendente).
