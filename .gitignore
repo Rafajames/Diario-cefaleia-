@@ -17,3 +17,4 @@ coverage/
 backups/
 supabase/.temp/
 supabase/.branches/
+*.tsbuildinfo
