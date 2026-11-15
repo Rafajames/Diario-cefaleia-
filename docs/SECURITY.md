@@ -82,3 +82,7 @@ painel Supabase.
 ## Relato de vulnerabilidades
 
 Não abra issue pública com detalhes. Comunique o responsável técnico da CENDOR por canal privado.
+
+## Administrador com atuação clínica
+
+Por padrão o administrador não acessa dados clínicos. Contas administradoras escolhidas podem ser habilitadas para também atuar como médico ligando `profiles.clinical_enabled` diretamente no banco (`supabase/seed/provision_admin_clinico.sql`); gatilho `app.protect_profile` impede qualquer alteração pelo aplicativo. Mesmo habilitado, o acesso a um paciente exige vínculo ativo autorizado por ele, consentimento de compartilhamento e abertura de prontuário registrada em `access_logs`.

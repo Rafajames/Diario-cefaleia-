@@ -146,7 +146,7 @@ export function AdminLinksPage() {
   const [grantee, setGrantee] = useState('')
   const act = useAction()
   const patients = (people.data ?? []).filter((p) => p.role === 'patient' && p.status === 'active')
-  const grantees = (people.data ?? []).filter((p) => p.role !== 'patient' && p.status === 'active')
+  const grantees = (people.data ?? []).filter((p) => (p.role === 'professional' || (p.role === 'admin' && p.clinical_enabled)) && p.status === 'active')
   const opt = (p: Profile) => ({ value: p.id, label: `${p.full_name || p.email}${p.role === 'admin' ? ' (administrador)' : ''}` })
   return (
     <div className="space-y-4">

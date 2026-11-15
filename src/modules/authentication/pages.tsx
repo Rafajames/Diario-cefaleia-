@@ -17,7 +17,7 @@ export function AuthShell({ title, children, footer }: { title: string; children
   return (
     <main className="mx-auto flex min-h-dvh max-w-md flex-col justify-center gap-4 p-4">
       <header className="text-center">
-        <img src={`${import.meta.env.BASE_URL}icon.svg`} alt="" className="mx-auto mb-2 h-14 w-14" />
+        <img src={`${import.meta.env.BASE_URL}logo-claro.png`} alt="Diário da Cefaleia" className="mx-auto mb-2 h-14 w-14" />
         <p className="text-2xl font-bold text-brand">{INSTITUTION.appName}</p>
         <p className="text-xs text-muted">{INSTITUTION.full}</p>
       </header>

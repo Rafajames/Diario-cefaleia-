@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.0 — 2026-11-15
+
+- Logo oficial do projeto (variantes clara e escura), ícones do PWA e favicon.
+- Publicação no GitHub Pages (workflow `pages.yml`, caminho base configurável por `VITE_BASE`).
+- Administrador com atuação clínica: campo `profiles.clinical_enabled`, ligado **somente no SQL** (`supabase/seed/provision_admin_clinico.sql`, migration `0004`). Sem ele, o administrador não recebe vínculos nem usa o painel profissional. Com ele, continuam exigidos vínculo autorizado pelo paciente, consentimento e abertura de prontuário registrada.
+- Troca de perfil (Administrador ⇄ Médico) para contas habilitadas.
+
 ## 0.1.0 — 2026-11-15
 
 Primeira versão funcional (pré-produção).

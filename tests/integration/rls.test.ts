@@ -291,4 +291,33 @@ describe.skipIf(!url)('segurança do banco (RLS)', () => {
       await denied(as('ana', (q) => q(`delete from consents where user_id = $1`, [ids.ana])))
     })
   })
+
+  describe('administrador com atuação clínica (somente contas habilitadas no banco)', () => {
+    it('administrador não habilitado não pode receber vínculo nem usar o painel profissional', async () => {
+      await denied(as('bia', (q) => q(`insert into care_links (patient_id, grantee_id, status) values ($1, $2, 'active')`, [ids.bia, ids.root2])))
+      await denied(as('root2', (q) => q(`select * from professional_overview()`)))
+      expect(await rows('bia', `select id from find_grantee_by_email('root2@teste.dev')`)).toHaveLength(0)
+    })
+    it('o aplicativo não consegue habilitar a atuação clínica (nem o próprio administrador)', async () => {
+      await denied(as('root', (q) => q(`update profiles set clinical_enabled = true where id = $1`, [ids.root])))
+      await denied(as('root', (q) => q(`update profiles set clinical_enabled = true where id = $1`, [ids.root2])))
+      await denied(as('bia', (q) => q(`update profiles set clinical_enabled = true where id = $1`, [ids.bia])))
+    })
+    it('habilitado no banco, atua como médico, mas só com vínculo, consentimento e abertura registrada', async () => {
+      await db.query(`update profiles set clinical_enabled = true where id = $1`, [ids.root])
+      await db.query(`insert into professionals (id) values ($1) on conflict do nothing`, [ids.root])
+      expect(await rows('bia', `select id from find_grantee_by_email('root@teste.dev')`)).toHaveLength(1)
+      await as('bia', (q) => q(`insert into care_links (patient_id, grantee_id, status) values ($1, $2, 'active')`, [ids.bia, ids.root]))
+      await consent('bia', 'professional_sharing')
+      expect(await rows('root', `select id from patients where id = $1`, [ids.bia])).toHaveLength(0)
+      await as('root', (q) => q(`select open_patient_record($1)`, [ids.bia]))
+      expect(await rows('root', `select id from patients where id = $1`, [ids.bia])).toHaveLength(1)
+      await as('root', (q) => q(`insert into clinical_notes (patient_id, author_id, content) values ($1, $2, 'Obs. do médico-administrador')`, [ids.bia, ids.root]))
+      expect(await rows('bia', `select content from clinical_notes`)).toHaveLength(1)
+    })
+    it('o outro administrador, não habilitado, continua sem acesso aos dados do mesmo paciente', async () => {
+      expect(await rows('root2', `select id from patients where id = $1`, [ids.bia])).toHaveLength(0)
+      await denied(as('root2', (q) => q(`select open_patient_record($1)`, [ids.bia])))
+    })
+  })
 })

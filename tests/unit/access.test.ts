@@ -13,6 +13,9 @@ describe('permissões por perfil', () => {
     expect(canAccessArea('professional', 'admin')).toBe(false)
     expect(canAccessArea('professional', 'patient')).toBe(false)
     expect(canAccessArea('admin', 'admin')).toBe(true)
+    expect(canAccessArea('admin', 'professional')).toBe(false)
+    expect(canAccessArea('admin', 'professional', true)).toBe(true)
+    expect(canAccessArea('professional', 'admin', true)).toBe(false)
     expect(canAccessArea(null, 'patient')).toBe(false)
   })
   it('define a tela inicial de cada perfil', () => {

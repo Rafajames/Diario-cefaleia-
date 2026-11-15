@@ -6,11 +6,12 @@ export type Area = 'patient' | 'professional' | 'admin'
 const AREAS: Record<Role, Area[]> = {
   patient: ['patient'],
   professional: ['professional'],
-  // O administrador usa a área profissional apenas para pacientes que o autorizaram explicitamente
-  admin: ['admin', 'professional'],
+  admin: ['admin'],
 }
 
-export const canAccessArea = (role: Role | null | undefined, area: Area): boolean => !!role && AREAS[role].includes(area)
+/** O administrador só usa a área profissional se a conta foi habilitada para atuação clínica (feito no banco). */
+export const canAccessArea = (role: Role | null | undefined, area: Area, clinical = false): boolean =>
+  !!role && (AREAS[role].includes(area) || (role === 'admin' && clinical && area === 'professional'))
 
 export const homeFor = (role: Role): string => (role === 'admin' ? '/admin' : role === 'professional' ? '/profissional' : '/')
 
@@ -28,9 +29,9 @@ export function missingConsents(role: Role, granted: Partial<Record<ConsentType,
 export type Gate = 'login' | 'suspended' | 'consents' | 'forbidden' | 'ok'
 
 /** Decide o que mostrar para uma rota protegida. */
-export function gateFor(profile: Pick<Profile, 'role' | 'status'> | null, granted: Partial<Record<ConsentType, boolean>>, area: Area): Gate {
+export function gateFor(profile: (Pick<Profile, 'role' | 'status'> & { clinical_enabled?: boolean }) | null, granted: Partial<Record<ConsentType, boolean>>, area: Area): Gate {
   if (!profile) return 'login'
   if (profile.status !== 'active') return 'suspended'
   if (missingConsents(profile.role, granted).length) return 'consents'
-  return canAccessArea(profile.role, area) ? 'ok' : 'forbidden'
+  return canAccessArea(profile.role, area, !!profile.clinical_enabled) ? 'ok' : 'forbidden'
 }

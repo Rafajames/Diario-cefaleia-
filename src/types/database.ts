@@ -14,6 +14,8 @@ export interface Profile {
   email: string
   role: Role
   status: AccountStatus
+  /** Administrador habilitado (no banco) para também atuar como médico. */
+  clinical_enabled: boolean
   created_at: string
   updated_at: string
 }
